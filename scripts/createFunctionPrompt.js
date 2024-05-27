@@ -17,6 +17,7 @@ function setupProject(functionName, functionType) {
   const dirPath = path.join(process.cwd(), functionName);
   const indexPath = path.join(dirPath, "index.ts");
   const packagePath = path.join(dirPath, "package.json");
+  const tsConfigPath = path.join(dirPath, "tsconfig.json");
 
   // Create directory
   if (!fs.existsSync(dirPath)) {
@@ -50,6 +51,20 @@ cloudEvent("${functionName}", (cloudEvent) => {
     fs.writeFileSync(indexPath, indexContent);
 
     // Create package.json
+    const tsConfigJson = {
+      compilerOptions: {
+        target: "ES2018",
+        module: "CommonJS",
+        allowJs: true,
+        esModuleInterop: true,
+        forceConsistentCasingInFileNames: true,
+        strict: true,
+        skipLibCheck: true,
+      },
+      include: ["**/*.ts"],
+    };
+
+    // Create package.json
     const packageJson = {
       name: functionName,
       version: "1.0.0",
@@ -73,6 +88,7 @@ cloudEvent("${functionName}", (cloudEvent) => {
       },
     };
     fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
+    fs.writeFileSync(tsConfigPath, JSON.stringify(tsConfigJson, null, 2));
 
     // Show a loading spinner while installing npm packages
     const spinner = ora("Installing npm packages...").start();
